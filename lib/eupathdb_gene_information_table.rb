@@ -41,7 +41,12 @@ class EuPathDBGeneInformationFileExtractor
   end
 end
 
-# A class for representing and reading the gene information files
+# A class for parsing the 'gene information table' files from EuPathDB, such
+# as http://cryptodb.org/common/downloads/release-4.3/Cmuris/txt/CmurisGene_CryptoDB-4.3.txt
+#
+# The usual way of interacting with these is the use of the each method, 
+# which returns a EuPathDBGeneInformation object with all of the recorded
+# information in it.
 class EuPathDBGeneInformationTable
   include Enumerable
   
@@ -50,7 +55,8 @@ class EuPathDBGeneInformationTable
     @io = io
   end
   
-  # Iterate over the genes in the file
+  # Return a EuPathDBGeneInformation object with
+  # the contained info in it, one at a time
   def each
     while g = next_gene
       yield g
@@ -114,6 +120,10 @@ class EuPathDBGeneInformationTable
   end
 end
 
+# Each gene in the gene information table is represented
+# by 2 types of information - info and tables.
+# info are 1 line data, whereas tables are tables of
+# data with possibly multiple rows
 class EuPathDBGeneInformation
   def info
     @info
