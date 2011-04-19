@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "lib/eupathdb_gff.rb",
     "lib/jgi_genes.rb",
     "lib/reubypathdb.rb",
+    "reubypathdb.gemspec",
     "test/data/eupathGeneInformation.txt",
     "test/helper.rb",
     "test/test_eupathdb_gene_information_table.rb"
