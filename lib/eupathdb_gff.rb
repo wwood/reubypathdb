@@ -18,7 +18,8 @@ class EupathDBGFF < JgiGenesGff
       'rRNA',
       'tRNA',
       'snRNA',
-      'transcript'
+      'transcript',
+      'ncRNA',
     ]
   end
   
