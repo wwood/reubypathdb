@@ -1,6 +1,8 @@
 = eupathdb
 
-Description goes here.
+ALPHA software! Most likely the interface to the methods will change, and often.
+
+Reubypathdb is a collection of Ruby methods associated with EuPathDB(.org) databases. Reubypathdb focuses on using files downloaded from the downloads sections of different databases, e.g. the GFF file and the gene information file for each species.
 
 == Note on Patches/Pull Requests
  
