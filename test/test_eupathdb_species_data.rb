@@ -104,4 +104,10 @@ class EuPathDBSpeciesDataTest < Test::Unit::TestCase
     assert_equal "http://plasmodb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['PlasmoDB']}/Pvivax/fasta",
     spd.eu_path_db_fasta_download_directory
  end
+ 
+ def test_representative_strain_name
+   spd = EuPathDBSpeciesData.new('Trypanosoma brucei')
+   assert_equal "http://tritrypdb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}/Tbrucei/fasta/TbruceiTreu927Genomic_TriTrypDB-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}.fasta",
+    "#{spd.eu_path_db_fasta_download_directory}/#{spd.genomic_fasta_filename}"
+ end
 end

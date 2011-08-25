@@ -63,6 +63,7 @@ class EuPathDBSpeciesData
       :sequencing_centre_abbreviation => 'psu',
       :fasta_file_species_name => 'Neospora_caninum',
       :database_download_folder => 'NeosporaCaninum',
+      :representative_strain_name => 'NeosporaCaninum',
       :proteins_fasta_filename => lambda {|version| "NeosporaCaninumAnnotatedProteins_ToxoDB-#{version}.fasta"},
       :transcripts_fasta_filename => lambda {|version| "NeosporaCaninumAnnotatedTranscripts_ToxoDB-#{version}.fasta"},
       :source => 'ToxoDB',
@@ -134,6 +135,7 @@ class EuPathDBSpeciesData
     'Babesia bovis' => {
       :name => 'Babesia bovis',
       :database_download_folder => 'BbovisT2Bo',
+      :representative_strain_name => 'BbovisT2Bo',
       :sequencing_centre_abbreviation => 'Genbank',
       :fasta_file_species_name => 'Babesia_bovis_T2Bo',
       :source => 'PiroplasmaDB',
@@ -145,6 +147,14 @@ class EuPathDBSpeciesData
       :sequencing_centre_abbreviation => 'CGD',
       :fasta_file_species_name => 'Candida_albicans_SC5314',
       :source => 'FungiDB',
+    },
+    ## TriTrypDB
+    'Trypanosoma brucei' => {
+      :name => 'Trypanosoma brucei',
+      :sequencing_centre_abbreviation => 'GeneDB',
+      :source => 'TriTrypDB',
+      :representative_strain_name => 'TbruceiTreu927',
+      :fasta_file_species_name => 'Trypanosoma_brucei_TREU927',
     },
   }
   # Duplicate so both the species name and genus-species name work
@@ -165,6 +175,7 @@ class EuPathDBSpeciesData
     'CryptoDB' => '4.4',#'4.5',#
     'PiroplasmaDB' => '1.0',#'1.1',#
     'FungiDB' => '1.0',
+    'TriTrypDB' => '3.2',
   }
   DATABASES = SOURCE_VERSIONS.keys
   
@@ -210,14 +221,18 @@ class EuPathDBSpeciesData
     "#{local_download_directory}/#{gene_information_filename}"
   end
   
+  def representative_strain_name
+    return @species_data[:representative_strain_name] unless @species_data[:representative_strain_name].nil?
+    return one_word_name
+  end
+  
   def gene_information_filename
     f = @species_data[:gene_information_filename]
     if f
       "#{f.call(version)}"
-    else
-      # TgondiiME49Gene_ToxoDB-5.2.txt.gz
+    else      # TgondiiME49Gene_ToxoDB-5.2.txt.gz
       # PfalciparumGene_PlasmoDB-6.1.txt.gz
-      "#{one_word_name}Gene_#{database}-#{version}.txt"
+      "#{representative_strain_name}Gene_#{database}-#{version}.txt"
     end
   end
   
@@ -229,7 +244,7 @@ class EuPathDBSpeciesData
     if @species_data[:proteins_fasta_filename]
       return "#{@species_data[:proteins_fasta_filename].call(version)}"
     else
-      return "#{one_word_name}AnnotatedProteins_#{database}-#{version}.fasta"
+      return "#{representative_strain_name}AnnotatedProteins_#{database}-#{version}.fasta"
     end
   end
   
@@ -245,7 +260,7 @@ class EuPathDBSpeciesData
     if @species_data[:transcripts_fasta_filename]
       return "#{@species_data[:transcripts_fasta_filename].call(version)}"
     else
-      return "#{one_word_name}AnnotatedTranscripts_#{database}-#{version}.fasta"
+      return "#{representative_strain_name}AnnotatedTranscripts_#{database}-#{version}.fasta"
     end
   end
   
@@ -258,7 +273,7 @@ class EuPathDBSpeciesData
     if genomic
       return "#{genomic.call(version)}"
     else
-      return "#{one_word_name}Genomic_#{database}-#{version}.fasta"
+      return "#{representative_strain_name}Genomic_#{database}-#{version}.fasta"
     end
   end
   
@@ -266,7 +281,7 @@ class EuPathDBSpeciesData
     if @species_data[:gff_filename]
       return @species_data[:gff_filename].call(version)
     else
-      return "#{one_word_name}_#{database}-#{version}.gff"
+      return "#{representative_strain_name}_#{database}-#{version}.gff"
     end
   end
   
