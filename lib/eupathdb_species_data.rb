@@ -10,6 +10,7 @@
 # be forced on the user.
 class EuPathDBSpeciesData
   @@data = {
+    ## PlasmoDB
     'Plasmodium falciparum' => {
       :name => 'Plasmodium falciparum',
       :source => 'PlasmoDB',
@@ -56,6 +57,7 @@ class EuPathDBSpeciesData
       :source => 'PlasmoDB',
       :behind_usage_policy => true,
     },
+    ## ToxoDB
     'Neospora caninum' => {
       :name => 'Neospora caninum',
       :sequencing_centre_abbreviation => 'psu',
@@ -86,6 +88,7 @@ class EuPathDBSpeciesData
       :genomic_fasta_filename => lambda {|version| "TgondiiME49Genomic_ToxoDB-#{version}.fasta"},
       :source => 'ToxoDB'
     },
+    ## CryptoDB
     'Cryptosporidium parvum' => {
       :name => 'Cryptosporidium parvum',
       :sequencing_centre_abbreviation => 'gb',
@@ -113,7 +116,7 @@ class EuPathDBSpeciesData
       #:gff_filename => lambda {|version| "c_muris.gff"}, #changed as of version 4.3
       :source => 'CryptoDB'
     },
-    
+    ## PiroplasmaDB
     'Theileria annulata' => {
       :name => 'Theileria annulata',
       :database_download_folder => 'TannulataAnkara',
@@ -135,6 +138,14 @@ class EuPathDBSpeciesData
       :fasta_file_species_name => 'Babesia_bovis_T2Bo',
       :source => 'PiroplasmaDB',
     },
+    ## FungiDB
+    'Candida albicans' => {
+      :name => 'Candida albicans',
+      :database_download_folder => 'Candida_albicans_SC5314',
+      :sequencing_centre_abbreviation => 'CGD',
+      :fasta_file_species_name => 'Candida_albicans_SC5314',
+      :source => 'FungiDB',
+    },
   }
   # Duplicate so both the species name and genus-species name work
   @@data.keys.each do |key|
@@ -153,6 +164,7 @@ class EuPathDBSpeciesData
     'ToxoDB' => '6.4',#'7.0',#
     'CryptoDB' => '4.4',#'4.5',#
     'PiroplasmaDB' => '1.0',#'1.1',#
+    'FungiDB' => '1.0',
   }
   DATABASES = SOURCE_VERSIONS.keys
   
@@ -267,12 +279,12 @@ class EuPathDBSpeciesData
   end
   
   def eu_path_db_download_directory
-    directories = {
-      'PlasmoDB' => "http://plasmodb.org/common/downloads/release-#{SOURCE_VERSIONS['PlasmoDB']}",
-      'ToxoDB' => "http://toxodb.org/common/downloads/release-#{SOURCE_VERSIONS['ToxoDB']}",
-      'CryptoDB' => "http://cryptodb.org/common/downloads/release-#{SOURCE_VERSIONS['CryptoDB']}",
-      'PiroplasmaDB' => "http://piroplasmadb.org/common/downloads/release-#{SOURCE_VERSIONS['PiroplasmaDB']}",
-    }
+    directories = {}
+    SOURCE_VERSIONS.each do |db, version|
+      # 'PlasmoDB' => "http://plasmodb.org/common/downloads/release-#{SOURCE_VERSIONS['PlasmoDB']}",
+      directories[db] = "http://#{db.downcase}.org/common/downloads/release-#{version}"
+    end
+    raise Exception, "Base URL for database '#{database}' not known" if directories[database].nil?
     return "#{directories[database]}/#{one_word_name}"
   end
   
@@ -311,6 +323,10 @@ class EuPathDBSpeciesData
   # otherwise mkdir throws errors because there isn't sufficient folders
   # to build on.
   def directories_for_mkdir
+    if @base_data_directory.nil?
+      raise Exception, "Unable to generate directories when @base_data_directory is not set"
+    end
+    
     s = @species_data
     components = [
       @base_data_directory,
@@ -326,12 +342,57 @@ class EuPathDBSpeciesData
   end
   
   # Return a list of the species names that are included in the EuPathDB database
-  def self.species_data_from_database(database_name)
+  def self.species_data_from_database(database_name, base_download_directory=nil)
     species = @@data.select {|name, info|
     info[:source].downcase == database_name.downcase
     }
     species.collect do |name_info|
-      SpeciesData.new(name_info[0])
+      EuPathDBSpeciesData.new(name_info[0], base_download_directory)
+    end
+  end
+  
+  # Download all the data files from all the EuPathDB databases, or just one single database.
+  # Requires wget to be available on the command line
+  def self.download(base_download_directory, database_name=nil)
+    # by default, download everything
+    if database_name.nil?
+      EuPathDBSpeciesData::DATABASES.each do |d|
+        download base_download_directory, d
+      end
+    else
+      # Download the new files from the relevant database
+      EuPathDBSpeciesData.species_data_from_database(database_name, base_download_directory).each do |spd|
+        spd.directories_for_mkdir.each do |directory|
+          unless File.exists?(directory)
+            Dir.mkdir(directory)
+          end
+        end
+        
+        Dir.chdir(spd.local_download_directory) do
+          p spd.eu_path_db_fasta_download_directory
+            
+          # protein
+          unless File.exists?(spd.protein_fasta_filename)
+            `wget #{spd.eu_path_db_fasta_download_directory}/#{spd.protein_fasta_filename}`
+          end
+          # gff
+          unless File.exists?(spd.gff_filename)
+            `wget #{spd.eu_path_db_gff_download_directory}/#{spd.gff_filename}`
+          end
+          # transcripts
+          unless File.exists?(spd.transcript_fasta_filename)
+            `wget #{spd.eu_path_db_fasta_download_directory}/#{spd.transcript_fasta_filename}`
+          end
+          # gene information table
+          unless File.exists?(spd.gene_information_filename)
+            `wget '#{spd.eu_path_db_txt_download_directory}/#{spd.gene_information_filename}'`
+          end
+          # genomic
+          unless File.exists?(spd.genomic_fasta_filename)
+            `wget '#{spd.eu_path_db_fasta_download_directory}/#{spd.genomic_fasta_filename}'`
+          end
+        end
+      end
     end
   end
 end
