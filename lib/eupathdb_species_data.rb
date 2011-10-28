@@ -186,7 +186,7 @@ class EuPathDBSpeciesData
   #
   # base_data_directory is the directory where locally cached version of the downloaded
   # files are stored.
-  def initialize(nickname, base_data_directory=nil)
+  def initialize(nickname, base_data_directory=nil, database_version=nil)
     @species_data = @@data[nickname] # try the full name
     @species_data ||= @@data[nickname.capitalize.gsub('_',' ')] #try replacing underscores
     if @species_data.nil? # try using just the second word
@@ -195,10 +195,13 @@ class EuPathDBSpeciesData
         @species_data = @@data[splits[1]]
       end
     end
+    raise Exception, "Couldn't find species data for #{nickname}" unless @species_data
     
     @base_data_directory = base_data_directory
     
-    raise Exception, "Couldn't find species data for #{nickname}" unless @species_data
+    # record out what version of the db we are looking at, otherwise default
+    @database_version = database_version
+    @database_version ||= SOURCE_VERSIONS[@species_data[:source]]
   end
   
   def method_missing(symbol)
@@ -237,7 +240,7 @@ class EuPathDBSpeciesData
   end
   
   def version
-    SOURCE_VERSIONS[@species_data[:source]]
+    @database_version
   end
   
   def protein_fasta_filename
@@ -294,13 +297,7 @@ class EuPathDBSpeciesData
   end
   
   def eu_path_db_download_directory
-    directories = {}
-    SOURCE_VERSIONS.each do |db, version|
-      # 'PlasmoDB' => "http://plasmodb.org/common/downloads/release-#{SOURCE_VERSIONS['PlasmoDB']}",
-      directories[db] = "http://#{db.downcase}.org/common/downloads/release-#{version}"
-    end
-    raise Exception, "Base URL for database '#{database}' not known" if directories[database].nil?
-    return "#{directories[database]}/#{one_word_name}"
+    "http://#{database.downcase}.org/common/downloads/release-#{@database_version}/#{one_word_name}"
   end
   
   def eu_path_db_fasta_download_directory
@@ -331,7 +328,7 @@ class EuPathDBSpeciesData
   
   def local_download_directory
     s = @species_data
-    "#{@base_data_directory}/#{s[:name]}/genome/#{s[:source]}/#{SOURCE_VERSIONS[s[:source]]}"
+    "#{@base_data_directory}/#{s[:name]}/genome/#{s[:source]}/#{@database_version}"
   end
   
   # an array of directory names. mkdir is called on each of them in order,
@@ -348,7 +345,7 @@ class EuPathDBSpeciesData
     s[:name],
       'genome',
     s[:source],
-    SOURCE_VERSIONS[s[:source]]
+    @database_version,
     ]
     
      (0..components.length-1).collect do |i|
