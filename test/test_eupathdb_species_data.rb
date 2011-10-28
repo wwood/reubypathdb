@@ -110,4 +110,10 @@ class EuPathDBSpeciesDataTest < Test::Unit::TestCase
    assert_equal "http://tritrypdb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}/Tbrucei/fasta/TbruceiTreu927Genomic_TriTrypDB-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}.fasta",
     "#{spd.eu_path_db_fasta_download_directory}/#{spd.genomic_fasta_filename}"
  end
+ 
+ def test_non_default_db_version_of_protein_fasta
+   spd = EuPathDBSpeciesData.new('Plasmodium yoelii', base_dir,'100.9')
+   assert_equal "/home/ben/phd/data/Plasmodium yoelii/genome/PlasmoDB/100.9/PyoeliiAnnotatedProteins_PlasmoDB-100.9.fasta",
+   spd.protein_fasta_path
+ end
 end
