@@ -407,4 +407,8 @@ class EuPathDBSpeciesData
       end
     end
   end
+  
+  def protein_fasta_file_iterator
+    Bio::EuPathDB::FastaParser.new(fasta_file_species_name, protein_fasta_path)
+  end
 end
