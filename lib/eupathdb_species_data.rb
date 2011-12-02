@@ -76,6 +76,7 @@ class EuPathDBSpeciesData
       :source => 'ToxoDB',
       :database_download_folder => 'EtenellaHoughton',
       :behind_usage_policy => true,
+      :fasta_file_species_name => 'Eimeria_tenella_str._Houghton',
     },
     'Toxoplasma gondii' => {
       :name => 'Toxoplasma gondii',
