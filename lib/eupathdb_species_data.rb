@@ -357,7 +357,8 @@ class EuPathDBSpeciesData
   # Return a list of the species names that are included in the EuPathDB database
   def self.species_data_from_database(database_name, base_download_directory=nil)
     species = @@data.select {|name, info|
-    info[:source].downcase == database_name.downcase
+      info[:source].downcase == database_name.downcase and
+      name == info[:name] #only allow ones that are fully specified - not shortcut ones
     }
     species.collect do |name_info|
       EuPathDBSpeciesData.new(name_info[0], base_download_directory)

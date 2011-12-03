@@ -97,23 +97,32 @@ class EuPathDBSpeciesDataTest < Test::Unit::TestCase
     spd = EuPathDBSpeciesData.new('Plasmodium chabaudi')
     assert_equal "http://plasmodb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['PlasmoDB']}/Pchabaudi/fasta/data",
     spd.eu_path_db_fasta_download_directory
- end
+  end
  
- def test_behind_usage_policy
+  def test_behind_usage_policy
     spd = EuPathDBSpeciesData.new('Plasmodium vivax')
     assert_equal "http://plasmodb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['PlasmoDB']}/Pvivax/fasta",
     spd.eu_path_db_fasta_download_directory
- end
+  end
  
- def test_representative_strain_name
-   spd = EuPathDBSpeciesData.new('Trypanosoma brucei')
-   assert_equal "http://tritrypdb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}/Tbrucei/fasta/TbruceiTreu927Genomic_TriTrypDB-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}.fasta",
+  def test_representative_strain_name
+    spd = EuPathDBSpeciesData.new('Trypanosoma brucei')
+    assert_equal "http://tritrypdb.org/common/downloads/release-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}/Tbrucei/fasta/TbruceiTreu927Genomic_TriTrypDB-#{EuPathDBSpeciesData::SOURCE_VERSIONS['TriTrypDB']}.fasta",
     "#{spd.eu_path_db_fasta_download_directory}/#{spd.genomic_fasta_filename}"
- end
+  end
  
- def test_non_default_db_version_of_protein_fasta
-   spd = EuPathDBSpeciesData.new('Plasmodium yoelii', base_dir,'100.9')
-   assert_equal "/home/ben/phd/data/Plasmodium yoelii/genome/PlasmoDB/100.9/PyoeliiAnnotatedProteins_PlasmoDB-100.9.fasta",
-   spd.protein_fasta_path
- end
+  def test_non_default_db_version_of_protein_fasta
+    spd = EuPathDBSpeciesData.new('Plasmodium yoelii', base_dir,'100.9')
+    assert_equal "/home/ben/phd/data/Plasmodium yoelii/genome/PlasmoDB/100.9/PyoeliiAnnotatedProteins_PlasmoDB-100.9.fasta",
+    spd.protein_fasta_path
+  end
+  
+  def test_species_data_from_database
+    plasmos = EuPathDBSpeciesData.species_data_from_database('PlasmoDB')
+    # make sure there is only 1 of each species being produced - there was a bug about that multiple species were being generated at one point
+    bergs = plasmos.select{|s| 
+      EuPathDBSpeciesData.new(s.name).name == 'Plasmodium berghei'
+    }
+    assert_equal ['Plasmodium berghei'], bergs.collect{|d| d.name}
+  end
 end
