@@ -171,12 +171,12 @@ class EuPathDBSpeciesData
   end
   
   SOURCE_VERSIONS = {
-    'PlasmoDB' => '8.1',
-    'ToxoDB' => '7.1',
-    'CryptoDB' => '4.5',
+    'PlasmoDB' => '8.2',
+    'ToxoDB' => '7.2',
+    'CryptoDB' => '4.6',
     'PiroplasmaDB' => '1.1',
     'FungiDB' => '1.0',
-    'TriTrypDB' => '3.3',
+    'TriTrypDB' => '4.0',
   }
   DATABASES = SOURCE_VERSIONS.keys
   
